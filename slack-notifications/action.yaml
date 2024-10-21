@@ -1,0 +1,27 @@
+name: Trigger Slack Notification
+description: Triggers a Slack notification for a given message.
+inputs:
+  slack_notification_webhook:
+    description: Slack Notification Webhook endpoint
+    required: true
+  slack_message:
+    description: Message to be sent to Slack
+    required: true
+
+outputs: {}
+
+runs:
+  using: composite
+  steps:
+  - name: Install prerequisites
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y curl
+    shell: bash
+  - name: Prepare Deployment Repository
+    env:
+      SLACK_WEBHOOK: ${{ inputs.slack_notification_webhook }}
+      MESSAGE: ${{ inputs.slack_message }}
+    run: |
+      curl --silent -X POST --data "{\"text\":\"$MESSAGE\"}" ${SLACK_WEBHOOK}
+    shell: bash

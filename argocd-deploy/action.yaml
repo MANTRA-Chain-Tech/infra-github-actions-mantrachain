@@ -1,0 +1,89 @@
+name: ArgoCD Deployment
+description: GitOps Deployment Template for committing tagged updates to ArgoCD-relevant repo and path
+inputs:
+  argocd_git_host:
+    description: Git Repository Hostname
+    required: true
+    default: "github.com"
+  argocd_git_token:
+    description: ArgoCD App Repository access token for GitOps - CICD Commits
+    required: true
+  argocd_repo: 
+    description: ArgoCD App Repository (paired with git_host)
+    required: true
+  argocd_repo_ref:
+    description: ArgoCD App Repository branch name
+    required: true
+  argocd_repo_local_folder: 
+    description: Local folder to clone the ArgoCD App Repository to
+    required: true
+    default: argocd-app-repo
+  argocd_target_path:
+    description: Target Path/File within the ArgoCD App Repo to parse and commit tag updates
+    required: true
+  update_paths:
+    description: Comma-separated string list of yaml paths to update.
+    required: true
+  update_value:
+    description: Full value that should be updated in place for ArgoCD gitops.
+    required: true
+  update_message:
+    description: Message to be used for GitOps commits on the relevant ArgoCD repo.
+    required: true
+
+outputs: {}
+
+runs:
+  using: composite
+  steps:
+  - name: Install prerequisites
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y curl wget git
+      sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
+      sudo chmod +x /usr/bin/yq
+      git config --global user.email "tech@mantra.finance"
+      git config --global user.name "MANTRA Tech: DevOps"
+    shell: bash
+  - name: Prepare Deployment Repository
+    env:
+      GIT_HOST: ${{ inputs.argocd_git_host }}
+      ARGOCD_APP_ACCESS_TOKEN: ${{ inputs.argocd_git_token }}
+      ARGOCD_REPO_REF: ${{ inputs.argocd_repo_ref }}
+      ARGOCD_REPO: ${{ inputs.argocd_repo }}
+      ARGOCD_REPO_FOLDER: ${{ inputs.argocd_repo_local_folder }}
+      ARGOCD_TARGET_PATH: ${{ inputs.argocd_target_path }}
+      ARGOCD_UPDATE_PATHS: ${{ inputs.update_paths }} # ".spec.generators[0].matrix.generators[0].list.elements[0].values.tags"  # .spec.template.spec.source.targetRevision <-- Ommitted for now.
+      UPDATE_VALUE: ${{ inputs.update_value }}
+      UPDATE_MESSAGE: ${{ inputs.update_message }}
+    run: |
+      set -x
+      echo "${UPDATE_MESSAGE}"
+      git clone --branch "${ARGOCD_REPO_REF}" https://${ARGOCD_APP_ACCESS_TOKEN}@${GIT_HOST}/${ARGOCD_REPO} ${ARGOCD_REPO_FOLDER}
+      cd ${ARGOCD_REPO_FOLDER}/
+      read -ra target_paths <<< "$ARGOCD_TARGET_PATH"
+      for target_path in ${target_paths[@]}
+        do
+          if [ ! -f "${target_path//,}" ]; then echo "${target_path//,} not found; exit code 1" && exit 1; fi
+          read -ra update_paths <<< "$ARGOCD_UPDATE_PATHS"
+          for update_path in ${update_paths[@]}
+            do
+              yq eval "(${update_path//,}) = strenv(UPDATE_VALUE)" -i ${target_path//,}
+            done
+        done     
+      if [[ -z "$(git status -s)" ]]; then echo "Current configuration already set. No change made, exit 0" && exit 0; fi
+      if [[ $MERGE_REQUEST == "true" ]]; then
+        git checkout -b $(echo "$UPDATE_MESSAGE" | tr ' ' '-')
+      fi
+      for target_path in ${target_paths[@]}
+        do
+          git add "${target_path//,}"
+        done
+      git commit -m "${UPDATE_MESSAGE}"
+      if [[ $MERGE_REQUEST == "true" ]]; then
+        git push https://${ARGOCD_APP_ACCESS_TOKEN}@${GIT_HOST}/${ARGOCD_REPO} $(echo "$UPDATE_MESSAGE" | tr ' ' '-') -o merge_request.create -o merge_request.target=${ARGOCD_REPO_REF}
+      else
+        git pull --rebase origin "${ARGOCD_REPO_REF}"
+        git push https://${ARGOCD_APP_ACCESS_TOKEN}@${GIT_HOST}/${ARGOCD_REPO} HEAD:${ARGOCD_REPO_REF}
+      fi
+    shell: bash
