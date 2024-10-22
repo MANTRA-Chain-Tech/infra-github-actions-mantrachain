@@ -42,8 +42,8 @@ runs:
       sudo apt-get install -y curl wget git
       sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
       sudo chmod +x /usr/bin/yq
-      git config --global user.email "tech@mantra.finance"
-      git config --global user.name "MANTRA Tech: DevOps"
+      git config --global user.email "gcp-security-admins+github-bot@mantra.finance"
+      git config --global user.name "MANTRA-Finance BOT"
     shell: bash
   - name: Prepare Deployment Repository
     env:
