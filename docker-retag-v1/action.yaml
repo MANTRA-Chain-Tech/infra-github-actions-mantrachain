@@ -1,0 +1,42 @@
+name: Docker Re-Tag v1
+description: Re-tag Docker images using regctl utility, https://github.com/regclient/regclient/tree/main
+inputs:
+  container_repository:
+    description: Repository for Image Build and Storage.
+    required: true
+  registry:
+    description: Container Image Registry for Authentication.
+    required: true
+  registry_username:
+    description: Container Image Registry Username.
+    required: true
+  registry_password:
+    description: Container Image Registry Password.
+    required: true
+  retag_target:
+    description: The new tag for the image to be retagged to.
+    required: true
+
+outputs: { }
+
+runs:
+  using: composite
+  steps:
+  - 
+    name: Log in to the Container registry
+    uses: docker/login-action@v3
+    with:
+      registry: ${{ inputs.registry }}
+      username: ${{ inputs.registry_username }}
+      password: ${{ inputs.registry_password }}
+  - 
+    name: Convert in-place commit ref to version tag
+    id: retag
+    env:
+      IMAGE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    run: |
+      export GITHUB_SHORT_SHA=`echo ${{ github.sha }} | cut -c1-7`
+      curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 >regctl
+      chmod 755 regctl
+      ./regctl image copy ${{ inputs.container_repository }}:${GITHUB_SHORT_SHA} ${{ inputs.container_repository }}:${{ env.IMAGE_TAG }}
+      echo "::set-output name=version::${GITHUB_SHORT_SHA}"
