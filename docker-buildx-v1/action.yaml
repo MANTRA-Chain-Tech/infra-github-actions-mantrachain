@@ -73,7 +73,7 @@ runs:
     with:
       context: ${{ inputs.build_context }}
       platforms: ${{ inputs.arch }}
-      push: ${{ github.event_name != 'pull_request' }}
+      push: ${{ inputs.docker_push }} # ${{ github.event_name != 'pull_request' }}
       tags: ${{ steps.meta.outputs.tags }}
       labels: ${{ steps.meta.outputs.labels }}
       build-args: ${{ inputs.build_args }}
