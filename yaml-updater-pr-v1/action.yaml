@@ -101,7 +101,7 @@ runs:
       body: ${{ inputs.update_message }}
       base: ${{ inputs.k8s_repo_target_branch }}
       branch: ${{ inputs.pr_branch_name }}
-      delete-branch: true
-      add-paths: |
-        *.yaml
-        *.yml
+      # delete-branch: true
+      # add-paths: |
+      #   *.yaml
+      #   *.yml
