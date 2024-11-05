@@ -43,14 +43,15 @@ outputs: {}
 runs:
   using: composite
   steps:
+  - uses: actions/checkout@v4
   - name: Install prerequisites
     env: 
       GPG_SIGNING_KEY: ${{ inputs.git_signing_key }}
     run: |
-      sudo apt-get update
-      sudo apt-get install -y curl wget git
-      sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
-      sudo chmod +x /usr/bin/yq
+      # sudo apt-get update
+      # sudo apt-get install -y curl wget git
+      # sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
+      # sudo chmod +x /usr/bin/yq
       if [[ -z "${GPG_SIGNING_KEY}" ]]; then echo "No GPG Signing Key provided. Skipping GPG Signing Key import."
       else
         echo "GPG Signing Key provided. Importing GPG Signing Key."
