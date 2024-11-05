@@ -68,9 +68,6 @@ runs:
       UPDATE_VALUE: ${{ inputs.update_value }}
     run: |
       set -x
-      pwd
-      ls -l
-      exit 0
       read -ra target_paths <<< "${{ inputs.k8s_target_full_paths }}"
       for target_path in ${target_paths[@]}
         do
@@ -89,7 +86,6 @@ runs:
               yq eval ".helmCharts[0].valuesInline.deployment.image.tag" -i ${target_path//,}
             done
         done     
-      if [[ -z "$(git status -s)" ]]; then echo "Current configuration already set. No change made, exit 0" && exit 0; fi
     shell: bash
 
   - name: Create Pull Request
