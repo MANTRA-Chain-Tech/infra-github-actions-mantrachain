@@ -5,9 +5,6 @@ inputs:
     description: Git Repository Hostname
     required: true
     default: "github.com"
-  k8s_repo_git_token:
-    description: ArgoCD App Repository access token for GitOps - CICD Commits
-    required: true
   k8s_repo:
     description: ArgoCD App Repository (paired with git_host)
     required: true
@@ -64,7 +61,6 @@ runs:
   - name: Prepare Deployment Repository
     env:
       GIT_HOST: ${{ inputs.git_host }}
-      K8S_REPO_GIT_TOKEN: ${{ inputs.k8s_repo_git_token }}
       K8S_REPO_REF_SOURCE: ${{ inputs.k8s_repo_ref_source }}
       K8S_REPO: ${{ inputs.k8s_repo }}
       K8S_REPO_TARGET_BRANCH: ${{ inputs.k8s_repo_target_branch }}
@@ -76,7 +72,7 @@ runs:
     run: |
       set -x
       echo "${UPDATE_MESSAGE}"
-      git clone --branch "${K8S_REPO_REF_SOURCE}" https://${K8S_REPO_GIT_TOKEN}@${GIT_HOST}/${K8S_REPO} ${K8S_REPO_LOCAL_FOLDER}
+      git clone --branch "${K8S_REPO_REF_SOURCE}" https://${GIT_HOST}/${K8S_REPO} ${K8S_REPO_LOCAL_FOLDER}
       cd ${K8S_REPO_LOCAL_FOLDER}/
       read -ra target_paths <<< "$K8S_TARGET_FULL_PATHS"
       for target_path in ${target_paths[@]}
