@@ -68,6 +68,9 @@ runs:
       UPDATE_VALUE: ${{ inputs.update_value }}
     run: |
       set -x
+      ls -l
+      ls -l .k8s
+      git status
       read -ra target_paths <<< "${{ inputs.k8s_target_full_paths }}"
       for target_path in ${target_paths[@]}
         do
