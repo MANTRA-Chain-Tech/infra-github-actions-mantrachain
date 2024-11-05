@@ -5,6 +5,9 @@ inputs:
     description: Git Repository Hostname
     required: true
     default: "github.com"
+  git_token:
+    description: Git Repository access token from the upstream repository
+    required: true
   k8s_repo_target_branch:
     description: Target branch we are updating the deployment image tag
     default: main
@@ -71,6 +74,7 @@ runs:
       body: ${{ inputs.update_message }}
       base: ${{ inputs.k8s_repo_target_branch }}
       branch: ${{ inputs.pr_branch_name }}
+      token: ${{ inputs.git_token }}
       # delete-branch: true
       # add-paths: |
       #   *.yaml
