@@ -57,7 +57,7 @@ runs:
               echo "> YQ value --> before"
               yq ".helmCharts[0].valuesInline.deployment.image.tag" ${target_path//,}
               
-              yq -i "${{update_path}} = \"${{inputs.update_value}}\"" "${target_path}"
+              yq -i "${update_path} = \"${{inputs.update_value}}\"" "${target_path}"
 
               # TODO: for testing only, to remove
               echo "YQ value --> after"
