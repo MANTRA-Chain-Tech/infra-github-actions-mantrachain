@@ -26,17 +26,10 @@ inputs:
   pr_branch_name:
     description: Name of the branch to create the PR
     required: true
-  git_signing_key:
-    description: GPG Signing Authorisation Key for GitOps commits on the current repo
-    required: false
-  sign-commits:
-    description: Sign commits
-    required: false
-    default: 'false'
   signoffs:
     description: Signoffs
     required: false
-    default: 'false'
+    default: 'true'
 
 outputs: {}
 
@@ -44,24 +37,6 @@ runs:
   using: composite
   steps:
   - uses: actions/checkout@v4
-  - name: Install prerequisites
-    env: 
-      GPG_SIGNING_KEY: ${{ inputs.git_signing_key }}
-    run: |
-      # sudo apt-get update
-      # sudo apt-get install -y curl wget git
-      # sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
-      # sudo chmod +x /usr/bin/yq
-      if [[ -z "${GPG_SIGNING_KEY}" ]]; then echo "No GPG Signing Key provided. Skipping GPG Signing Key import."
-      else
-        echo "GPG Signing Key provided. Importing GPG Signing Key."
-        echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import
-        git config --global user.signingkey $(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d '/' -f 2)
-        git config --global commit.gpgsign true
-      fi
-      git config --global user.email "security@mantra.finance"
-      git config --global user.name "MANTRA-Finance BOT"
-    shell: bash
 
   - name: Prepare Deployment Repository
     env:
