@@ -43,15 +43,11 @@ runs:
       UPDATE_VALUE: ${{ inputs.update_value }}
     run: |
       set -x
-      ls -l
-      ls -l .k8s
-      git status
       read -ra target_paths <<< "${{ inputs.k8s_target_full_paths }}"
       for target_path in ${target_paths[@]}
-        echo "TEST> Target path: ${target_path}"
         do
           if [ ! -f "${target_path//,}" ]; then echo "${target_path//,} not found; exit code 1" && exit 1; fi
-          read -ra update_paths <<< "${{ inputs.k8s_image_tag_yq_paths }}"
+          read -ra update_paths <<< "${{ inputs.k8s_yq_paths }}"
           for update_path in ${update_paths[@]}
             do
               # TODO: for testing only, to remove
