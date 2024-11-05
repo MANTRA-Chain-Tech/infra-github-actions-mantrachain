@@ -52,13 +52,13 @@ runs:
             do
               # TODO: for testing only, to remove
               echo "> YQ value --> before"
-              yq eval ".helmCharts[0].valuesInline.deployment.image.tag" -i ${target_path//,}
+              yq ".helmCharts[0].valuesInline.deployment.image.tag" ${target_path//,}
               
               yq eval "(${update_path//,}) = strenv(UPDATE_VALUE)" -i ${target_path//,}
 
               # TODO: for testing only, to remove
               echo "YQ value --> after"
-              yq eval ".helmCharts[0].valuesInline.deployment.image.tag" -i ${target_path//,}
+              yq ".helmCharts[0].valuesInline.deployment.image.tag" ${target_path//,}
             done
         done     
     shell: bash
