@@ -1,0 +1,100 @@
+name: Image tag - Create Pull Request
+description: Create a Kustomize pull request to update the deployment image tag
+inputs:
+  git_host:
+    description: Git Repository Hostname
+    required: true
+    default: "github.com"
+  k8s_repo_git_token:
+    description: ArgoCD App Repository access token for GitOps - CICD Commits
+    required: true
+  k8s_repo:
+    description: ArgoCD App Repository (paired with git_host)
+    required: true
+  k8s_repo_ref_source:
+    description: Repository reference source that we will create the PR from
+    required: true
+  k8s_repo_target_branch:
+    description: Target branch we are updating the deployment image tag
+    default: main
+  k8s_repo_local_folder: 
+    description: Local folder to clone the repository to
+    required: true
+    default: k8s-remote-repo
+  k8s_target_full_paths:
+    description: Target Path/File within the k8s rpo to parse and commit tag updates
+    required: true
+  k8s_yq_paths:
+    description: Comma-separated string list of yq yaml paths to update.
+    required: true
+  update_value:
+    description: Full value that should be updated in place for ArgoCD gitops.
+    required: true
+  update_message:
+    description: Message to be used for GitOps commits on the relevant ArgoCD repo.
+    required: true
+  git_signing_key:
+    description: GPG Signing Authorisation Key for GitOps commits on the relevant ArgoCD repo.
+    required: false
+
+outputs: {}
+
+runs:
+  using: composite
+  steps:
+  - name: Install prerequisites
+    env: 
+      GPG_SIGNING_KEY: ${{ inputs.git_signing_key }}
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y curl wget git
+      sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
+      sudo chmod +x /usr/bin/yq
+      if [[ -z "${GPG_SIGNING_KEY}" ]]; then echo "No GPG Signing Key provided. Skipping GPG Signing Key import."
+      else
+        echo "GPG Signing Key provided. Importing GPG Signing Key."
+        echo -n "$GPG_SIGNING_KEY" | base64 --decode | gpg --import
+        git config --global user.signingkey $(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d '/' -f 2)
+        git config --global commit.gpgsign true
+      fi
+      git config --global user.email "security@mantra.finance"
+      git config --global user.name "MANTRA-Finance BOT"
+      
+    shell: bash
+  - name: Prepare Deployment Repository
+    env:
+      GIT_HOST: ${{ inputs.git_host }}
+      K8S_REPO_GIT_TOKEN: ${{ inputs.k8s_repo_git_token }}
+      K8S_REPO_REF_SOURCE: ${{ inputs.k8s_repo_ref_source }}
+      K8S_REPO: ${{ inputs.k8s_repo }}
+      K8S_REPO_TARGET_BRANCH: ${{ inputs.k8s_repo_target_branch }}
+      K8S_REPO_LOCAL_FOLDER: ${{ inputs.k8s_repo_local_folder }}
+      K8S_TARGET_FULL_PATHS: ${{ inputs.k8s_target_full_paths }}
+      K8S_IMAGE_TAG_YQ_PATHS: ${{ inputs.k8s_image_tag_yq_paths }}
+      UPDATE_VALUE: ${{ inputs.update_value }}
+      UPDATE_MESSAGE: ${{ inputs.update_message }}
+    run: |
+      set -x
+      echo "${UPDATE_MESSAGE}"
+      git clone --branch "${K8S_REPO_REF_SOURCE}" https://${K8S_REPO_GIT_TOKEN}@${GIT_HOST}/${K8S_REPO} ${K8S_REPO_LOCAL_FOLDER}
+      cd ${K8S_REPO_LOCAL_FOLDER}/
+      read -ra target_paths <<< "$K8S_TARGET_FULL_PATHS"
+      for target_path in ${target_paths[@]}
+        do
+          if [ ! -f "${target_path//,}" ]; then echo "${target_path//,} not found; exit code 1" && exit 1; fi
+          read -ra update_paths <<< "$K8S_IMAGE_TAG_YQ_PATHS"
+          for update_path in ${update_paths[@]}
+            do
+              # TODO: for testing only, to remove
+              echo "> YQ value --> before"
+              yq eval ".helmCharts[0].valuesInline.deployment.image.tag" -i ${target_path//,}
+              
+              yq eval "(${update_path//,}) = strenv(UPDATE_VALUE)" -i ${target_path//,}
+
+              # TODO: for testing only, to remove
+              echo "YQ value --> after"
+              yq eval ".helmCharts[0].valuesInline.deployment.image.tag" -i ${target_path//,}
+            done
+        done     
+      if [[ -z "$(git status -s)" ]]; then echo "Current configuration already set. No change made, exit 0" && exit 0; fi
+    shell: bash
