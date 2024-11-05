@@ -72,8 +72,9 @@ runs:
     run: |
       set -x
       echo "${UPDATE_MESSAGE}"
-      git clone --branch "${K8S_REPO_REF_SOURCE}" https://${GIT_HOST}/${K8S_REPO} ${K8S_REPO_LOCAL_FOLDER}
-      cd ${K8S_REPO_LOCAL_FOLDER}/
+      pwd
+      ls -l
+      exit 0
       read -ra target_paths <<< "$K8S_TARGET_FULL_PATHS"
       for target_path in ${target_paths[@]}
         do
