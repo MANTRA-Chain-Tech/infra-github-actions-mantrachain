@@ -47,6 +47,8 @@ runs:
     run: |
       set -x
       git branch --show-current
+      echo "TEST> git token: ${{ inputs.git_token }}"
+      git status
       read -ra target_paths <<< "${{ inputs.k8s_target_full_paths }}"
       for target_path in ${target_paths[@]}
         do
@@ -64,7 +66,8 @@ runs:
               echo "YQ value --> after"
               yq ".helmCharts[0].valuesInline.deployment.image.tag" ${target_path//,}
             done
-        done     
+        done
+      git status
     shell: bash
 
   - name: Create Pull Request
