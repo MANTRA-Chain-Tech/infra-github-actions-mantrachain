@@ -48,6 +48,7 @@ runs:
       git status
       read -ra target_paths <<< "${{ inputs.k8s_target_full_paths }}"
       for target_path in ${target_paths[@]}
+        echo "TEST> Target path: ${target_path//,}"
         do
           if [ ! -f "${target_path//,}" ]; then echo "${target_path//,} not found; exit code 1" && exit 1; fi
           read -ra update_paths <<< "${{ inputs.k8s_image_tag_yq_paths }}"
@@ -69,7 +70,6 @@ runs:
   - name: Create Pull Request
     uses: peter-evans/create-pull-request@v7
     with:
-      sign-commits: ${{ inputs.sign-commits }}
       signoff: ${{ inputs.signoffs}}
       title: ${{ inputs.update_title }}
       body: ${{ inputs.update_message }}
