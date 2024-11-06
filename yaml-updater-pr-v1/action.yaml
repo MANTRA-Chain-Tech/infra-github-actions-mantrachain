@@ -78,6 +78,7 @@ runs:
       base: ${{ inputs.k8s_repo_target_branch }}
       branch: ${{ inputs.pr_branch_name }}
       token: ${{ inputs.git_token }}
+      author: "mantra-finance-bot <mantra-finance-bot@mantra.finance>"
       # delete-branch: true
       # add-paths: |
       #   *.yaml
