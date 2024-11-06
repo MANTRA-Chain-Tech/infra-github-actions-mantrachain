@@ -1,5 +1,5 @@
-name: Image tag - Create Pull Request
-description: Create a Kustomize pull request to update the deployment image tag
+name: Yaml Updater - Create Pull Request
+description: Create a pull request to update a value in a yaml
 inputs:
   git_host:
     description: Git Repository Hostname
@@ -9,7 +9,7 @@ inputs:
     description: Git Repository access token from the upstream repository
     required: true
   k8s_repo_target_branch:
-    description: Target branch we are updating the deployment image tag
+    description: Target branch we are updating a value in a yaml
     default: main
   k8s_target_full_paths:
     description: Target Path/File within the k8s rpo to parse and commit tag updates
