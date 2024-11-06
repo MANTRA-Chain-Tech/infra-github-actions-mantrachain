@@ -26,6 +26,9 @@ inputs:
   update_title:
     description: Title of the PR
     required: true
+  commit_message:
+    description: Title of the commit
+    required: true
   pr_branch_name:
     description: Name of the branch to create the PR
     required: true
@@ -33,6 +36,9 @@ inputs:
     description: Signoffs
     required: false
     default: 'true'
+  reviewers:
+    description: Person to review the PR
+    required: false
 
 outputs: {}
 
@@ -42,12 +48,8 @@ runs:
   - uses: actions/checkout@v4
 
   - name: Prepare Deployment Repository
-    env:
-      UPDATE_VALUE: ${{ inputs.update_value }}
     run: |
       set -x
-      git branch --show-current
-      echo "TEST> git token: ${{ inputs.git_token }}"
       read -ra target_paths <<< "${{ inputs.k8s_target_full_paths }}"
       for target_path in ${target_paths[@]}
         do
@@ -67,11 +69,9 @@ runs:
       signoff: ${{ inputs.signoffs}}
       title: ${{ inputs.update_title }}
       body: ${{ inputs.update_message }}
+      commit-message: ${{ inputs.commit_message }}
       base: ${{ inputs.k8s_repo_target_branch }}
       branch: ${{ inputs.pr_branch_name }}
       token: ${{ inputs.git_token }}
       author: "mantra-finance-bot <mantra-finance-bot@mantra.finance>"
-      # delete-branch: true
-      # add-paths: |
-      #   *.yaml
-      #   *.yml
+      reviewers: ${{ inputs.reviewers }}
