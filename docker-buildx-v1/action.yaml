@@ -36,6 +36,11 @@ runs:
   -
     name: Checkout
     uses: actions/checkout@v4
+
+  - name: Check if file exists
+    shell: bash
+    run: ls -la
+
   - 
     name: Docker meta
     id: meta
