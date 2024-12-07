@@ -3,10 +3,16 @@ description: Triggers a Slack notification for a given message.
 inputs:
   slack_notification_webhook:
     description: Slack Notification Webhook endpoint
-    required: true
+    required: false
   slack_message:
     description: Message to be sent to Slack
-    required: true
+    required: false
+  slack_app_token:
+    description: Slack App Token for sending more advanced Block Messages.
+    required: false
+  slack_block_message:
+    description: Message to be sent to Slack in block format (will override simple messages)
+    required: false
 
 outputs: {}
 
@@ -21,7 +27,12 @@ runs:
   - name: Prepare Deployment Repository
     env:
       SLACK_WEBHOOK: ${{ inputs.slack_notification_webhook }}
+      BLOCK_MESSAGE: ${{ inputs.slack_block_message }}
       MESSAGE: ${{ inputs.slack_message }}
     run: |
-      curl --silent -X POST --data "{\"text\":\"$MESSAGE\"}" ${SLACK_WEBHOOK}
+      if [ -z "${BLOCK_MESSAGE}" ]; then
+        curl --silent -X POST --data "${MESSAGE}" ${SLACK_WEBHOOK}
+      else
+        curl -H "Content-type: application/json; charset=utf-8" -H "Authorization: Bearer ${{ inputs.slack_app_token }}" -X POST --data '${BLOCK_MESSAGE//[$'\t\r\n']}' https://slack.com/api/chat.postMessage
+      fi
     shell: bash
