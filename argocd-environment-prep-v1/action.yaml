@@ -26,9 +26,6 @@ inputs:
     description: 'Whether this is manually triggered'
 
 outputs:
-  k8s_target_environment:
-    description: 'Processed K8s target environment'
-    value: ${{ steps.prep_env.outputs.k8s_target_environment }}
   pr_branch_name_suffix:
     description: 'Processed PR branch name suffix'
     value: ${{ steps.prep_env.outputs.pr_branch_name_suffix }}
