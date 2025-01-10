@@ -1,4 +1,14 @@
-# Notes: need to have checkout in the job, so it can read all the files
+# GitHub Action to update YAML files using yq for Kubernetes/ArgoCD GitOps deployments
+# 
+# This action allows updating specific yaml paths with new values, typically used to:
+# - Update container image tags in k8s manifests
+# - Modify environment variables or config values
+# - Change resource specifications
+#
+# Prerequisites:
+# - yq must be installed in the runner
+# - Git checkout must be done before this action
+# - Write permissions required for git operations
 
 name: Prepare Deployment Repository
 description: Update yaml files with new values using yq
