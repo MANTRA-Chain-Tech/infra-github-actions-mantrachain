@@ -1,3 +1,5 @@
+# Notes: need to have checkout in the job, so it can read all the files
+
 name: Prepare Deployment Repository
 description: Update yaml files with new values using yq
 inputs:
@@ -14,7 +16,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
     - name: Update YAML files
       shell: bash
       run: |
