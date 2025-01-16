@@ -32,10 +32,17 @@ outputs:
   k8s_target_full_paths:
     description: 'Full paths for K8s files'
     value: ${{ steps.k8s_paths.outputs.k8s_target_full_paths }}
+  short_commit_id:
+    description: 'Short commit ID'
+    value: ${{ steps.short_commit_id.outputs.short_commit_id }}
 
 runs:
   using: "composite"
   steps:
+    - id: short_commit_id
+      shell: bash
+      run: echo "short_commit_id=$(echo $GITHUB_SHA | cut -c1-7)" >> $GIT_OUTPUT
+
     - id: prep_env
       shell: bash
       run: |
