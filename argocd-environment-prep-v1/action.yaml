@@ -41,7 +41,7 @@ runs:
   steps:
     - id: short_commit_id
       shell: bash
-      run: echo "short_commit_id=$(echo $GITHUB_SHA | cut -c1-7)" >> $GIT_OUTPUT
+      run: echo "short_commit_id=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
 
     - id: prep_env
       shell: bash
