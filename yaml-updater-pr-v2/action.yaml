@@ -1,0 +1,68 @@
+name: Yaml Updater - Create Pull Request
+description: Create a pull request to update a value in a yaml
+inputs:
+  git_host:
+    description: Git Repository Hostname
+    required: true
+    default: "github.com"
+  git_token:
+    description: Git Repository access token from the upstream repository
+    required: true
+  k8s_repo_target_branch:
+    description: Target branch we are updating a value in a yaml
+    default: main
+  k8s_target_full_paths:
+    description: Target Path/File within the k8s rpo to parse and commit tag updates
+    required: true
+  k8s_yq_paths:
+    description: Comma-separated string list of yq yaml paths to update.
+    required: true
+  update_value:
+    description: Full value that should be updated in place for ArgoCD gitops.
+    required: true
+  update_message:
+    description: Message to be used for GitOps commits on the relevant ArgoCD repo.
+    required: true
+  update_title:
+    description: Title of the PR
+    required: true
+  commit_message:
+    description: Title of the commit
+    required: true
+  pr_branch_name:
+    description: Name of the branch to create the PR
+    required: true
+  signoffs:
+    description: Signoffs
+    required: false
+    default: 'true'
+  reviewers:
+    description: Person to review the PR
+    required: false
+
+outputs: {}
+
+runs:
+  using: composite
+  steps:
+  - uses: actions/checkout@v4
+
+  - name: Prepare Deployment Repository
+    uses: mantra-chain-tech/infra-github-actions-mantrachain/k8s-yaml-updater-v1@new-deployment-utilities
+    with:
+      k8s_target_full_paths: ${{ inputs.k8s_target_full_paths }}
+      k8s_yq_paths: ${{ inputs.k8s_yq_paths }}
+      update_value: ${{ inputs.update_value }}
+
+  - name: Create Pull Request
+    uses: peter-evans/create-pull-request@v7
+    with:
+      signoff: ${{ inputs.signoffs}}
+      title: ${{ inputs.update_title }}
+      body: ${{ inputs.update_message }}
+      commit-message: ${{ inputs.commit_message }}
+      base: ${{ inputs.k8s_repo_target_branch }}
+      branch: ${{ inputs.pr_branch_name }}
+      token: ${{ inputs.git_token }}
+      author: "mantra-finance-bot <mantra-finance-bot@mantra.finance>"
+      reviewers: ${{ inputs.reviewers }}

@@ -1,0 +1,43 @@
+# GitHub Action to update YAML files using yq for Kubernetes/ArgoCD GitOps deployments
+# 
+# This action allows updating specific yaml paths with new values, typically used to:
+# - Update container image tags in k8s manifests
+# - Modify environment variables or config values
+# - Change resource specifications
+#
+# Prerequisites:
+# - yq must be installed in the runner
+# - Git checkout must be done before this action
+# - Write permissions required for git operations
+
+name: Prepare Deployment Repository
+description: Update yaml files with new values using yq
+inputs:
+  k8s_target_full_paths:
+    description: Target Path/File within the k8s repo to parse and commit tag updates
+    required: true
+  k8s_yq_paths:
+    description: Comma-separated string list of yq yaml paths to update
+    required: true
+  update_value:
+    description: Full value that should be updated in place for ArgoCD gitops
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Update YAML files
+      shell: bash
+      run: |
+        set -x
+        read -ra target_paths <<< "${{ inputs.k8s_target_full_paths }}"
+        for target_path in ${target_paths[@]}
+          do
+            if [ ! -f "${target_path//,}" ]; then echo "${target_path//,} not found; exit code 1" && exit 1; fi
+            read -ra update_paths <<< "${{ inputs.k8s_yq_paths }}"
+            for update_path in ${update_paths[@]}
+              do
+                yq --inplace "${update_path} = \"${{inputs.update_value}}\"" "${target_path}"
+              done
+          done
+        git diff

@@ -1,0 +1,68 @@
+# Version: v1
+# Description: A composite GitHub Action that processes environment variables and 
+#              prepares Kubernetes paths for ArgoCD deployments.
+#
+# This action:
+# - Converts environment strings (e.g. "production:testnet:dukong") to filesystem paths
+# - Generates PR branch name suffixes from environment strings
+# - Constructs full Kubernetes file paths for updates
+
+name: 'ArgoCD Environment Preparation'
+description: 'Prepares environment variables and Kubernetes paths for ArgoCD deployments'
+
+inputs:
+  deployment_environment:
+    required: true
+    description: 'Deployment environment string (e.g. production:testnet:dukong)'
+  k8s_folder_path:
+    required: true
+    description: 'Base K8s folder path'
+  files_to_update_subpaths:
+    required: true
+    description: 'Comma-separated list of files to update'
+  manual_trigger:
+    required: false
+    default: 'false'
+    description: 'Whether this is manually triggered'
+
+outputs:
+  pr_branch_name_suffix:
+    description: 'Processed PR branch name suffix'
+    value: ${{ steps.prep_env.outputs.pr_branch_name_suffix }}
+  k8s_target_full_paths:
+    description: 'Full paths for K8s files'
+    value: ${{ steps.k8s_paths.outputs.k8s_target_full_paths }}
+  short_commit_id:
+    description: 'Short commit ID'
+    value: ${{ steps.short_commit_id.outputs.short_commit_id }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: short_commit_id
+      shell: bash
+      run: echo "short_commit_id=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_OUTPUT
+
+    - id: prep_env
+      shell: bash
+      run: |
+        TARGET_ENV_TEMP=$(echo "${{ inputs.deployment_environment }}" | tr ':' '/')
+        echo "k8s_target_environment=$TARGET_ENV_TEMP" >> $GITHUB_OUTPUT
+        
+        PR_BRANCH_NAME_SUFFIX_TEMP=$(echo "${{ inputs.deployment_environment }}" | tr ':' '-')
+        echo "pr_branch_name_suffix=$PR_BRANCH_NAME_SUFFIX_TEMP" >> $GITHUB_OUTPUT
+
+    - id: k8s_paths
+      shell: bash
+      run: |
+        if [[ "${{ inputs.files_to_update_subpaths }}" == *,* ]]; then
+          IFS=',' read -ra paths <<< "${{ inputs.files_to_update_subpaths }}"
+          full_paths=()
+          for path in "${paths[@]}"; do
+            full_paths+=("${{ inputs.k8s_folder_path }}/${{ steps.prep_env.outputs.k8s_target_environment }}/${path}")
+          done
+          echo "k8s_target_full_paths=${full_paths[*]}" >> $GITHUB_OUTPUT
+        else
+          full_path="${{ inputs.k8s_folder_path }}/${{ steps.prep_env.outputs.k8s_target_environment }}/${{ inputs.files_to_update_subpaths }}"
+          echo "k8s_target_full_paths=${full_path}" >> $GITHUB_OUTPUT
+        fi
