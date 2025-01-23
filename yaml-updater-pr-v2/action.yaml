@@ -48,7 +48,7 @@ runs:
   - uses: actions/checkout@v4
 
   - name: Prepare Deployment Repository
-    uses: mantra-chain-tech/infra-github-actions-mantrachain/k8s-yaml-updater-v1@new-deployment-utilities
+    uses: mantra-chain-tech/infra-github-actions-mantrachain/k8s-yaml-updater-v1@main
     with:
       k8s_target_full_paths: ${{ inputs.k8s_target_full_paths }}
       k8s_yq_paths: ${{ inputs.k8s_yq_paths }}
