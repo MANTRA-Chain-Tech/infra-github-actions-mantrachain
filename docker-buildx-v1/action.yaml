@@ -13,8 +13,10 @@ inputs:
   registry_password:
     description: Container Image Registry Password.
     required: true
+  build_file:
+    description: Path to Dockerfile (defaults to build context, Dockerfile)
   build_context:
-    description: Path to the Dockerfile.
+    description: Docker Build Context (defaults to local working directory)
     default: .
   build_args:
     description: Build arguments for the Dockerfile.
@@ -72,6 +74,7 @@ runs:
     uses: docker/build-push-action@v6
     with:
       context: ${{ inputs.build_context }}
+      file: ${{ inputs.build_file || join(inputs.build_context, "/Dockerfile") }}
       platforms: ${{ inputs.arch }}
       push: ${{ inputs.docker_push }} # ${{ github.event_name != 'pull_request' }}
       tags: ${{ steps.meta.outputs.tags }}
