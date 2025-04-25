@@ -74,7 +74,7 @@ runs:
     uses: docker/build-push-action@v6
     with:
       context: ${{ inputs.build_context }}
-      file: ${{ inputs.build_file || join(inputs.build_context, "/Dockerfile") }}
+      file: ${{ inputs.build_file || join(inputs.build_context, '/Dockerfile') }}
       platforms: ${{ inputs.arch }}
       push: ${{ inputs.docker_push }} # ${{ github.event_name != 'pull_request' }}
       tags: ${{ steps.meta.outputs.tags }}
