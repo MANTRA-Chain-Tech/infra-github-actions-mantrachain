@@ -1,0 +1,65 @@
+---
+name: 'Trigger and Monitor Workflow'
+description: |
+  Triggers a workflow in a remote repository and monitors it until completion
+inputs:
+  github-token:
+    description: |
+      GitHub token with permissions to trigger workflows in the target
+      repository
+    required: true
+  target-owner:
+    description: 'Owner of the target repository'
+    required: true
+  target-repo:
+    description: 'Name of the target repository'
+    required: true
+  workflow-id:
+    description: 'Workflow ID or filename to trigger'
+    required: true
+  workflow-ref:
+    description: 'Git reference (branch/tag) to run the workflow on'
+    required: true
+    default: 'main'
+  workflow-inputs:
+    description: 'JSON string of inputs to pass to the workflow'
+    required: false
+    default: '{}'
+  workflow-verification-timeout-minutes:
+    description: 'Timeout in minutes to wait for workflow verification'
+    required: false
+    default: '2'
+  workflow-verification-retry-interval-seconds:
+    description: 'Interval in seconds between verification attempts'
+    required: false
+    default: '10'
+  workflow-verification-buffer-seconds:
+    description: 'Buffer in seconds to account for timing differences'
+    required: false
+    default: '30'
+  workflow-completion-timeout-minutes:
+    description: 'Timeout in minutes to wait for workflow completion'
+    required: false
+    default: '10'
+  workflow-completion-retry-interval-seconds:
+    description: 'Interval in seconds between completion checks'
+    required: false
+    default: '10'
+  workflow-runs-per-page:
+    description: 'Number of workflow runs to fetch per page for verification'
+    required: false
+    default: '10'
+outputs:
+  workflow-run-id:
+    description: 'ID of the triggered workflow run'
+  workflow-run-url:
+    description: 'URL of the triggered workflow run'
+  workflow-run-status:
+    description: 'Status of the workflow run when found'
+  workflow-run-conclusion:
+    description: 'Conclusion of the workflow run when completed'
+  workflow-final-status:
+    description: 'Final status of the workflow run'
+runs:
+  using: 'node20'
+  main: 'index.js'
