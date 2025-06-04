@@ -52,14 +52,41 @@ inputs:
 outputs:
   workflow-run-id:
     description: 'ID of the triggered workflow run'
+    value: ${{ steps.run-action.outputs.workflow-run-id }}
   workflow-run-url:
     description: 'URL of the triggered workflow run'
+    value: ${{ steps.run-action.outputs.workflow-run-url }}
   workflow-run-status:
     description: 'Status of the workflow run when found'
+    value: ${{ steps.run-action.outputs.workflow-run-status }}
   workflow-run-conclusion:
     description: 'Conclusion of the workflow run when completed'
+    value: ${{ steps.run-action.outputs.workflow-run-conclusion }}
   workflow-final-status:
     description: 'Final status of the workflow run'
+    value: ${{ steps.run-action.outputs.workflow-final-status }}
 runs:
-  using: 'node20'
-  main: 'index.js'
+  using: 'composite'
+  steps:
+    - name: Install dependencies
+      run: |
+        cd ${{ github.action_path }}
+        npm install
+      shell: bash
+    - name: Run action
+      id: run-action
+      run: node ${{ github.action_path }}/index.js
+      shell: bash
+      env:
+        INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
+        INPUT_TARGET-OWNER: ${{ inputs.target-owner }}
+        INPUT_TARGET-REPO: ${{ inputs.target-repo }}
+        INPUT_WORKFLOW-ID: ${{ inputs.workflow-id }}
+        INPUT_WORKFLOW-REF: ${{ inputs.workflow-ref }}
+        INPUT_WORKFLOW-INPUTS: ${{ inputs.workflow-inputs }}
+        INPUT_WORKFLOW-VERIFICATION-TIMEOUT-MINUTES: ${{ inputs.workflow-verification-timeout-minutes }}
+        INPUT_WORKFLOW-VERIFICATION-RETRY-INTERVAL-SECONDS: ${{ inputs.workflow-verification-retry-interval-seconds }}
+        INPUT_WORKFLOW-VERIFICATION-BUFFER-SECONDS: ${{ inputs.workflow-verification-buffer-seconds }}
+        INPUT_WORKFLOW-COMPLETION-TIMEOUT-MINUTES: ${{ inputs.workflow-completion-timeout-minutes }}
+        INPUT_WORKFLOW-COMPLETION-RETRY-INTERVAL-SECONDS: ${{ inputs.workflow-completion-retry-interval-seconds }}
+        INPUT_WORKFLOW-RUNS-PER-PAGE: ${{ inputs.workflow-runs-per-page }}
