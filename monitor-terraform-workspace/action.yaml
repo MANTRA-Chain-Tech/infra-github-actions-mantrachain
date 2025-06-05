@@ -1,0 +1,91 @@
+name: 'Monitor Terraform Cloud Workspace'
+description: 'Monitor Terraform Cloud workspace runs and wait for completion'
+inputs:
+  terraform_token:
+    description: 'Terraform Cloud API token'
+    required: true
+  organization:
+    description: 'Terraform Cloud organization name'
+    required: true
+  workspace_name:
+    description: 'Terraform Cloud workspace name (use this OR workspace_id)'
+    required: false
+  workspace_id:
+    description: 'Terraform Cloud workspace ID (use this OR workspace_name)'
+    required: false
+  timeout_minutes:
+    description: 'Timeout in minutes for monitoring'
+    required: false
+    default: '10'
+  polling_interval_seconds:
+    description: 'Polling interval in seconds'
+    required: false
+    default: '5'
+  initial_wait_seconds:
+    description: 'Initial wait time in seconds before polling'
+    required: false
+    default: '10'
+  debug_logging:
+    description: 'Enable debug logging'
+    required: false
+    default: 'false'
+  monitor_purpose:
+    description: 'Purpose of monitoring for logging (e.g., "parent workspace", "child workspace")'
+    required: false
+    default: 'workspace'
+
+outputs:
+  run_status:
+    description: 'Final status of the Terraform run'
+    value: ${{ steps.monitor.outputs.run_status }}
+  run_url:
+    description: 'URL to the Terraform run'
+    value: ${{ steps.monitor.outputs.run_url }}
+  run_id:
+    description: 'ID of the Terraform run'
+    value: ${{ steps.monitor.outputs.run_id }}
+  workspace_id:
+    description: 'ID of the workspace that was monitored'
+    value: ${{ steps.monitor.outputs.workspace_id }}
+  workspace_name:
+    description: 'Name of the workspace that was monitored'
+    value: ${{ steps.monitor.outputs.workspace_name }}
+  error_message:
+    description: 'Error message if monitoring failed'
+    value: ${{ steps.monitor.outputs.error_message }}
+  summary_markdown:
+    description: 'Markdown summary of the monitoring results'
+    value: ${{ steps.monitor.outputs.summary_markdown }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.workspace_name }}" ] && [ -z "${{ inputs.workspace_id }}" ]; then
+          echo "❌ Error: Either workspace_name or workspace_id must be provided"
+          exit 1
+        fi
+        
+        if [ -n "${{ inputs.workspace_name }}" ] && [ -n "${{ inputs.workspace_id }}" ]; then
+          echo "⚠️ Warning: Both workspace_name and workspace_id provided. Using workspace_id."
+        fi
+
+    - name: Monitor Terraform workspace
+      id: monitor
+      shell: bash
+      env:
+        TF_API_TOKEN: ${{ inputs.terraform_token }}
+        ORGANIZATION: ${{ inputs.organization }}
+        INPUT_WORKSPACE_ID: ${{ inputs.workspace_id }}
+        INPUT_WORKSPACE_NAME: ${{ inputs.workspace_name }}
+        MONITOR_PURPOSE: ${{ inputs.monitor_purpose }}
+        TIMEOUT_MINUTES: ${{ inputs.timeout_minutes }}
+        POLLING_INTERVAL_SECONDS: ${{ inputs.polling_interval_seconds }}
+        INITIAL_WAIT_SECONDS: ${{ inputs.initial_wait_seconds }}
+        DEBUG_LOGGING: ${{ inputs.debug_logging }}
+      run: |
+        # Make scripts executable and run the main script
+        chmod +x "${{ github.action_path }}/scripts/"*.sh
+        "${{ github.action_path }}/scripts/monitor-workspace.sh"
