@@ -148,17 +148,19 @@ extract_package_info() {
     fi
     
     # Output all extracted information
-    echo "node_version=$node_version" >> "$GITHUB_OUTPUT"
-    echo "node_version_full=$node_version_full" >> "$GITHUB_OUTPUT"
-    echo "package_manager=$package_manager" >> "$GITHUB_OUTPUT"
-    echo "package_manager_version=$package_manager_version" >> "$GITHUB_OUTPUT"
-    echo "package_manager_full=$package_manager_full" >> "$GITHUB_OUTPUT"
-    echo "lock_file=$lock_file" >> "$GITHUB_OUTPUT"
-    echo "lock_file_path=$lock_file_path" >> "$GITHUB_OUTPUT"
-    echo "package_name=$package_name" >> "$GITHUB_OUTPUT"
-    echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
-    echo "turbo_available=$turbo_available" >> "$GITHUB_OUTPUT"
-    echo "package_json_path=$package_json_path" >> "$GITHUB_OUTPUT"
+    {
+        echo "node_version=$node_version"
+        echo "node_version_full=$node_version_full"
+        echo "package_manager=$package_manager"
+        echo "package_manager_version=$package_manager_version"
+        echo "package_manager_full=$package_manager_full"
+        echo "lock_file=$lock_file"
+        echo "lock_file_path=$lock_file_path"
+        echo "package_name=$package_name"
+        echo "package_version=$package_version"
+        echo "turbo_available=$turbo_available"
+        echo "package_json_path=$package_json_path"
+    } >> "$GITHUB_OUTPUT"
     
     # Log extracted information
     echo "📦 Package Information Extracted:"
@@ -172,9 +174,6 @@ extract_package_info() {
 }
 
 # If script is run directly, execute the function with provided arguments
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    extract_package_info "$@"
-fi
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     extract_package_info "$@"
 fi
