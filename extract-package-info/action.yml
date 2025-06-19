@@ -1,0 +1,71 @@
+name: 'Extract Package Info'
+description: 'Extract Node.js and package manager information from package.json'
+author: 'MANTRA Chain Tech'
+
+inputs:
+  working_directory:
+    description: 'Working directory containing package.json'
+    required: false
+    default: '.'
+  node_version_granularity:
+    description: 'Node.js version granularity: major, minor, or patch'
+    required: false
+    default: 'patch'
+  package_json_path:
+    description: 'Custom path to package.json file (relative to working_directory)'
+    required: false
+    default: 'package.json'
+
+outputs:
+  node_version:
+    description: 'Node.js version (formatted according to granularity)'
+    value: ${{ steps.extract.outputs.node_version }}
+  node_version_full:
+    description: 'Full Node.js version string from package.json'
+    value: ${{ steps.extract.outputs.node_version_full }}
+  package_manager:
+    description: 'Package manager name'
+    value: ${{ steps.extract.outputs.package_manager }}
+  package_manager_version:
+    description: 'Package manager version'
+    value: ${{ steps.extract.outputs.package_manager_version }}
+  package_manager_full:
+    description: 'Full package manager string (name@version)'
+    value: ${{ steps.extract.outputs.package_manager_full }}
+  lock_file:
+    description: 'Corresponding lock file name'
+    value: ${{ steps.extract.outputs.lock_file }}
+  lock_file_path:
+    description: 'Full path to the lock file'
+    value: ${{ steps.extract.outputs.lock_file_path }}
+  package_name:
+    description: 'Package name from package.json'
+    value: ${{ steps.extract.outputs.package_name }}
+  package_version:
+    description: 'Package version from package.json'
+    value: ${{ steps.extract.outputs.package_version }}
+  turbo_available:
+    description: 'Whether Turborepo configuration is available'
+    value: ${{ steps.extract.outputs.turbo_available }}
+  package_json_path:
+    description: 'Resolved path to package.json file'
+    value: ${{ steps.extract.outputs.package_json_path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Extract package information
+      id: extract
+      shell: bash
+      run: |
+        SCRIPT_DIR="${{ github.action_path }}"
+        source "$SCRIPT_DIR/extract-package-info.sh"
+        
+        extract_package_info \
+          "${{ inputs.working_directory }}" \
+          "${{ inputs.node_version_granularity }}" \
+          "${{ inputs.package_json_path }}"
+
+branding:
+  icon: 'package'
+  color: 'blue'
