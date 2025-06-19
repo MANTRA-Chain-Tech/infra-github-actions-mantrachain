@@ -164,7 +164,12 @@ extract_package_info() {
     
     # Log extracted information
     echo "📦 Package Information Extracted:"
-    echo "  📄 Package: $package_name@$package_version"
+    echo "  📄 Package Name: $package_name"
+    if [[ -n "$package_version" ]]; then
+        echo "  🔢 Package Version: $package_version"
+    else
+        echo "  🔢 Package Version: (not specified)"
+    fi
     echo "  🟢 Node.js: $node_version_full (using: $node_version)"
     echo "  📦 Package Manager: $package_manager@$package_manager_version"
     echo "  🔒 Lock File: $lock_file"
