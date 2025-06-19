@@ -1,0 +1,39 @@
+name: Test Extract Package Info Action
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'extract-package-info/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'extract-package-info/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run BATS Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install BATS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats
+          
+      - name: Install jq (required by script)
+        run: |
+          sudo apt-get install -y jq
+          
+      - name: Make script executable
+        run: |
+          chmod +x extract-package-info/extract-package-info.sh
+          
+      - name: Run BATS tests
+        run: |
+          cd extract-package-info
+          bats test/extract-package-info.bats
