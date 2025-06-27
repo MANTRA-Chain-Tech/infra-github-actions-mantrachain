@@ -1,0 +1,76 @@
+# Reusable workflow for running BATS (Bash Automated Testing System) tests
+# This workflow can be called from other workflows to test shell scripts and actions
+# 
+# Usage:
+#   uses: ./.github/workflows/reusable-test-bats.yml
+#   with:
+#     action-folder: "path/to/action"
+#     script-name: "main.sh"  # optional, defaults to main.sh
+#     test-folder: "test"     # optional, defaults to test
+
+name: Test BATS Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      action-folder:
+        description: 'The folder containing the action to test'
+        required: true
+        type: string
+      script-name:
+        description: 'Name of the main script to make executable'
+        required: false
+        type: string
+        default: 'main.sh'
+      test-folder:
+        description: 'Folder containing the BATS tests'
+        required: false
+        type: string
+        default: 'test'
+    secrets:
+      cloudflare-api-token:
+        description: 'Cloudflare API token for testing'
+        required: false
+
+jobs:
+  test:
+    name: Run BATS Tests
+    runs-on: ubuntu-latest    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install BATS and jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats jq
+          
+      - name: Make script executable 
+        working-directory: ${{ inputs.action-folder }}
+        run: |
+          if [ -f "${{ inputs.script-name }}" ]; then
+            chmod +x ${{ inputs.script-name }}
+            echo "Made ${{ inputs.script-name }} executable"
+          else
+            echo "Warning: ${{ inputs.script-name }} not found, skipping chmod"
+          fi
+          
+      - name: Run tests
+        working-directory: ${{ inputs.action-folder }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare-api-token }}
+        run: |
+          if [ ! -d "${{ inputs.test-folder }}" ]; then
+            echo "Error: Test folder '${{ inputs.test-folder }}' not found"
+            exit 1
+          fi
+          
+          cd ${{ inputs.test-folder }}
+          
+          if ! ls *.bats 1> /dev/null 2>&1; then
+            echo "Error: No .bats files found in ${{ inputs.test-folder }}"
+            exit 1
+          fi
+          
+          echo "Running BATS tests..."
+          bats *.bats

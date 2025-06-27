@@ -1,0 +1,20 @@
+name: Test Manage Cloudflare ZTA App Action
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'manage-cloudflare-zta-app/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'manage-cloudflare-zta-app/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    uses: ./.github/workflows/reusable-test-bats.yml
+    with:
+      action-folder: 'manage-cloudflare-zta-app'
+    secrets:
+      cloudflare-api-token: ${{ secrets.CLOUDFLARE_WORKERS_SANDBOX_API_TOKEN }}
