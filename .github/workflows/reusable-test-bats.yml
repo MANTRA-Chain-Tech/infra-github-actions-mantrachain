@@ -42,7 +42,6 @@ jobs:
       
       - name: Install BATS and jq
         run: |
-          sudo apt-get update
           sudo apt-get install -y bats jq
           
       - name: Make script executable 
