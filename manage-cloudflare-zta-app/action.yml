@@ -1,0 +1,58 @@
+name: 'Manage Cloudflare Zero Trust Access Application'
+description: 'Create or delete Cloudflare Zero Trust Access applications'
+author: 'MantraChain DevOps'
+
+inputs:
+  action:
+    description: 'Action to perform (create or delete)'
+    required: true
+    default: 'create'
+  app_name:
+    description: 'Name of the application'
+    required: true
+  domain:
+    description: 'Domain for the application'
+    required: true
+  cloudflare_account_id:
+    description: 'Cloudflare Account ID'
+    required: true
+  cloudflare_api_token:
+    description: 'Cloudflare API Token'
+    required: true
+  policies:
+    description: 'Policies in format POLICY_ID1:PRECEDENCE1,POLICY_ID2:PRECEDENCE2'
+    required: false
+    default: '1a3e0a22-040d-4941-a899-a370548e5bd5:1,66f03940-062b-4d65-9c32-7c714ac89194:2'
+
+outputs:
+  app_id:
+    description: 'The ID of the created/managed application'
+    value: ${{ steps.manage-app.outputs.app_id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check dependencies
+      shell: bash
+      run: |
+        if ! command -v jq &> /dev/null; then
+          echo "Installing jq..."
+          sudo apt-get update && sudo apt-get install -y jq
+        fi
+    
+    - name: Manage Cloudflare Access Application
+      id: manage-app
+      shell: bash
+      env:
+        CLOUDFLARE_ACCOUNT_ID: ${{ inputs.cloudflare_account_id }}
+        CLOUDFLARE_API_TOKEN: ${{ inputs.cloudflare_api_token }}
+      run: |
+        ${{ github.action_path }}/main.sh \
+          --action "${{ inputs.action }}" \
+          --name "${{ inputs.app_name }}" \
+          --domain "${{ inputs.domain }}" \
+          --policies "${{ inputs.policies }}"
+
+branding:
+  icon: 'shield'
+  color: 'orange'
