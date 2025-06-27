@@ -7,7 +7,7 @@ setup() {
     export TEST_DIR
     
     # Source the script under test
-    source "${BATS_TEST_DIRNAME}/../extract-package-info.sh"
+    source "${BATS_TEST_DIRNAME}/../main.sh"
     
     # Mock GITHUB_OUTPUT for testing
     export GITHUB_OUTPUT="$TEST_DIR/github_output"

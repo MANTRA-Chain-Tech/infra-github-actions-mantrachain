@@ -87,7 +87,7 @@ Run the BATS tests:
 
 ```bash
 cd extract-package-info
-bats test/extract-package-info.bats
+bats test/test.bats
 ```
 
 ## Example Scenarios

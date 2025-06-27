@@ -59,7 +59,7 @@ runs:
       shell: bash
       run: |
         SCRIPT_DIR="${{ github.action_path }}"
-        source "$SCRIPT_DIR/extract-package-info.sh"
+        source "$SCRIPT_DIR/main.sh"
         
         extract_package_info \
           "${{ inputs.working_directory }}" \
