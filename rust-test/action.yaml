@@ -1,0 +1,29 @@
+name: Rust Test
+description: 'Run Rust tests (cargo test) on the specified package or workspace'
+
+inputs:
+  package_name:
+    description: 'The specific package to test. If empty, tests the whole workspace.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache cargo dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Run tests on specific package
+      shell: bash
+      if: ${{ inputs.package_name }} != ''
+      run: cargo test --package ${{ inputs.package_name }}
+
+    - name: Run tests on workspace
+      shell: bash
+      if: ${{ inputs.package_name }} == ''
+      run: cargo test --workspace
