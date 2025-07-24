@@ -31,4 +31,4 @@ runs:
     - name: Run linter on workspace
       shell: bash
       if: ${{inputs.package_name}} == ''
-      run: cargo clippy --workspace -- -D warnings
+      run: cargo clippy --workspace -- -D ${{ inputs.deny_level }}
