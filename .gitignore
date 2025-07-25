@@ -1,2 +1,6 @@
 # Local secrets for act testing
 .secrets
+
+# Rust build artifacts
+**/test-project/target/
+**/test-project/Cargo.lock

@@ -13,6 +13,12 @@ Monitors Terraform Cloud workspace runs with detailed status reporting and error
 ### [📦 Extract Package Info](./extract-package-info/)
 Extracts Node.js and package manager information from `package.json` files with support for multiple package managers.
 
+### [🦀 Rust Lint](./rust-lint/)
+Runs Rust linter (cargo clippy) on a specific package or entire workspace with customizable lint levels.
+
+### [🧪 Rust Test](./rust-test/)
+Runs Rust tests (cargo test) on a specific package or entire workspace.
+
 ## 🧪 Local Testing with Act
 
 This repository includes local testing capabilities using [act](https://github.com/nektos/act) and [just](https://github.com/casey/just).
@@ -64,6 +70,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -
 | `just setup-secrets` | Create .secrets file from example |
 | `just test-extract-package-info` | Test extract-package-info action |
 | `just test-cloudflare-zta` | Test cloudflare-zta-app action |
+| `just test-rust-lint` | Test rust-lint action |
+| `just test-rust-test` | Test rust-test action |
 | `just test-all` | Test all workflows |
 | `just list-workflows` | List available workflows |
 | `just test-workflow <path>` | Test specific workflow |
@@ -76,6 +84,10 @@ curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -
 ```bash
 # Test specific workflow with custom path
 just test-workflow .github/workflows/extract-package-info.yml
+
+# Test rust actions
+just test-rust-lint
+just test-rust-test
 
 # Test workflow that requires secrets
 just test-workflow-with-secrets .github/workflows/manage-cloudflare-zta-app.yml
