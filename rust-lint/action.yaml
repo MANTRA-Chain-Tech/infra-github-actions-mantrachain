@@ -7,9 +7,9 @@ inputs:
     required: true
     default: ''
   deny_level:
-    description: 'The lint level to deny (other available options: allow, warn, deny, forbid).'
+    description: 'The lint level to deny (other available options: warnings, errors, infos, and notes).'
     required: false
-    default: 'warnings'
+    default: 'errors'
 
 runs:
   using: 'composite'
@@ -26,9 +26,9 @@ runs:
     - name: Run linter on specific package
       shell: bash
       if: ${{inputs.package_name}} != ''
-      run: cargo clippy --package ${{ inputs.package_name }} -- -D ${{ inputs.deny_level }}
+      run: cargo clippy -p ${{ inputs.package_name }} -- -D ${{ inputs.deny_level }}
 
     - name: Run linter on workspace
       shell: bash
       if: ${{inputs.package_name}} == ''
-      run: cargo clippy --workspace -- -D ${{ inputs.deny_level }}
+      run: cargo clippy --all-targets --all-features -- -D ${{ inputs.deny_level }}
