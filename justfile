@@ -24,12 +24,24 @@ test-extract-package-info:
 test-cloudflare-zta: setup-secrets
     act push --secret-file .secrets -W .github/workflows/manage-cloudflare-zta-app.yml
 
+# Test rust-lint action
+test-rust-lint:
+    act push -W .github/workflows/rust-lint.yml
+
+# Test rust-test action  
+test-rust-test:
+    act push -W .github/workflows/rust-test.yml
+
 # Test all workflows
 test-all: setup-secrets
     @echo "Testing extract-package-info..."
     @just test-extract-package-info
     @echo "Testing cloudflare-zta-app..."
     @just test-cloudflare-zta
+    @echo "Testing rust-lint..."
+    @just test-rust-lint
+    @echo "Testing rust-test..."
+    @just test-rust-test
 
 # List all available workflows
 list-workflows:

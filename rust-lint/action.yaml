@@ -7,9 +7,9 @@ inputs:
     required: true
     default: ''
   deny_level:
-    description: 'The lint level to deny (other available options: warnings, errors, infos, and notes).'
+    description: 'The lint level to deny (e.g., warnings, clippy::all, clippy::correctness).'
     required: false
-    default: 'errors'
+    default: 'warnings'
 
 runs:
   using: 'composite'

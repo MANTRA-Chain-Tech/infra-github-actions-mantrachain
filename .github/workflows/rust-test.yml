@@ -1,0 +1,43 @@
+name: Test Rust Test Action
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'rust-test/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'rust-test/**'
+  workflow_dispatch:
+
+jobs:
+  test-workspace-tests:
+    name: Test workspace testing
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust-test/test-project
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Test rust-test action on workspace
+        uses: ./rust-test
+        with:
+          package_name: ''
+
+  test-package-tests:
+    name: Test package-specific testing
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust-test/test-project
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Test rust-test action on specific package
+        uses: ./rust-test
+        with:
+          package_name: 'test-package'

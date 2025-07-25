@@ -1,0 +1,61 @@
+name: Test Rust Lint Action
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'rust-lint/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'rust-lint/**'
+  workflow_dispatch:
+
+jobs:
+  test-workspace-lint:
+    name: Test workspace linting
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust-lint/test-project
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Test rust-lint action on workspace
+        uses: ./rust-lint
+        with:
+          package_name: ''
+          deny_level: 'warnings'
+
+  test-package-lint:
+    name: Test package-specific linting
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust-lint/test-project
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Test rust-lint action on specific package
+        uses: ./rust-lint
+        with:
+          package_name: 'test-package'
+          deny_level: 'warnings'
+
+  test-error-level:
+    name: Test with clippy deny level
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust-lint/test-project
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Test rust-lint action with clippy deny level
+        uses: ./rust-lint
+        with:
+          package_name: ''
+          deny_level: 'clippy::all'

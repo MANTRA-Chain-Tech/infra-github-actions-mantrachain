@@ -1,0 +1,6 @@
+[package]
+name = "test-package"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
