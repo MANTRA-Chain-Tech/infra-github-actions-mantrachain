@@ -19,6 +19,8 @@ runs:
 
     - name: Setup Rust toolchain
       uses: dtolnay/rust-toolchain@stable
+      with:
+        components: clippy
 
     - name: Cache cargo dependencies
       uses: Swatinem/rust-cache@v2
