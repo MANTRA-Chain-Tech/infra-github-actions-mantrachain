@@ -92,8 +92,6 @@ create_app() {
     local policies_str="$3"
     local allowed_idp="$4"
 
-    echo "LETS GO CREATE"
-    
     # If policies string is empty, use default
     if [ -z "$policies_str" ]; then
         policies_str="$DEFAULT_POLICIES"
