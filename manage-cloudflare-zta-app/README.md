@@ -24,6 +24,7 @@ A GitHub Action to create and delete Cloudflare Zero Trust Access applications w
     domain: 'myapp.example.com'
     cloudflare_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
     cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    allowed_idp: 'bc3fa177-7ef6-45c1-999b-1eb49b0c8edf'
 ```
 
 ### Delete Application
@@ -51,6 +52,7 @@ A GitHub Action to create and delete Cloudflare Zero Trust Access applications w
     cloudflare_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
     cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     policies: 'policy-id-1:1,policy-id-2:2,policy-id-3:3'
+    allowed_idp: 'bc3fa177-7ef6-45c1-999b-1eb49b0c8edf'
 ```
 
 ### Using Output
@@ -65,6 +67,7 @@ A GitHub Action to create and delete Cloudflare Zero Trust Access applications w
     domain: 'myapp.example.com'
     cloudflare_account_id: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
     cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    allowed_idp: 'bc3fa177-7ef6-45c1-999b-1eb49b0c8edf'
 
 - name: Use App ID
   run: echo "Created app with ID: ${{ steps.create-app.outputs.app_id }}"
@@ -80,6 +83,10 @@ A GitHub Action to create and delete Cloudflare Zero Trust Access applications w
 | `cloudflare_account_id` | Cloudflare Account ID | Yes | - |
 | `cloudflare_api_token` | Cloudflare API Token | Yes | - |
 | `policies` | Policies in format `POLICY_ID1:PRECEDENCE1,POLICY_ID2:PRECEDENCE2` | No | Default MantraChain policies |
+| `allowed_idp` | Allowed Identity Provider ID | Yes | `bc3fa177-7ef6-45c1-999b-1eb49b0c8edf` |
+
+Notes:
+- allowed_idp value can be found in : `Cloudflare > Zero Trust > Settings > Authentication > Login methods > Your chosen IDP > Edit`, and copy the ID from the URL suffix.
 
 ## Outputs
 
@@ -148,11 +155,7 @@ Integration tests use the real Cloudflare account ID `2ff8e4962cfd414617e13d4c50
    - Account:Cloudflare Access:Edit
 3. Access to create/delete applications on the test domain `integration-test.mantrachain.io`
 
-Integration tests are idempotent and include proper cleanup. They test:
-- Creating applications (with automatic deletion of existing ones)
-- Deleting applications (idempotent behavior)
-- Real API error handling
-- Custom policy configurations
+Integration tests are idempotent and include cleanup.
 
 **Note**: Integration tests will create and delete real Cloudflare Access applications during testing.
 
@@ -164,17 +167,5 @@ You can also use the script directly:
 export CLOUDFLARE_ACCOUNT_ID="your-account-id"
 export CLOUDFLARE_API_TOKEN="your-api-token"
 
-./manage.sh --action create --name "My App" --domain "myapp.com" --policies "policy-id:1"
+./manage.sh --action create --name "My App" --domain "myapp.com" --policies "policy-id:1" --allowed-idp "abcd-...-efgh"
 ```
-
-## Error Handling
-
-- Invalid action: Script exits with error
-- Missing required parameters: Script exits with error
-- Missing environment variables: Script exits with error
-- API failures: Script exits with error and displays API error message
-- Delete non-existent app: Success (no error)
-
-## License
-
-MIT License - see LICENSE file for details.
