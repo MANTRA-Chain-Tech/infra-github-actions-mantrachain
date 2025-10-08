@@ -4,7 +4,8 @@
 # Requires CLOUDFLARE_API_TOKEN environment variable to be set
 
 # Configuration
-readonly MANTRACHAIN_POLICIES="1a3e0a22-040d-4941-a899-a370548e5bd5:1,66f03940-062b-4d65-9c32-7c714ac89194:2"
+readonly MANTRACHAIN_POLICIES="40ea00dc-82fe-4140-8a26-711a64b30bc8:1,507e8075-4be7-4924-a42b-2d38e7719a63:2"
+readonly DEFAULT_ALLOWED_IDP="bc3fa177-7ef6-45c1-999b-1eb49b0c8edf"
 
 # Function to verify API token
 verify_token() {
@@ -72,11 +73,14 @@ teardown() {
     # Verify app doesn't exist before creation
     result=$(check_app_exists "$TEST_DOMAIN")
     [ -z "$result" ]
-    
+
     # Create the app (with MantraChain policies)
-    run create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES"
+    run create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" "$DEFAULT_ALLOWED_IDP"
+    echo "$output"
+
     [ "$status" -eq 0 ]
     [[ "$output" != "" ]]
+
     
     # Store the app ID (last line of output)
     app_id=$(echo "$output" | tail -n1)
@@ -88,13 +92,13 @@ teardown() {
 
 @test "integration: create app when it already exists (idempotent)" {
     # First create an app
-    run create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES"
+    run create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" "$DEFAULT_ALLOWED_IDP"
     [ "$status" -eq 0 ]
     app_id1=$(echo "$output" | tail -n1)
     [ -n "$app_id1" ]
     
     # Create again (should delete and recreate)
-    run create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES"
+    run create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" "$DEFAULT_ALLOWED_IDP"
     [ "$status" -eq 0 ]
     [[ "$output" != "" ]]
     
@@ -110,7 +114,7 @@ teardown() {
 
 @test "integration: delete existing app" {
     # First create an app
-    output=$(create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" 2>&1)
+    output=$(create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" "$DEFAULT_ALLOWED_IDP" 2>&1)
     app_id=$(echo "$output" | tail -n1)
     [ -n "$app_id" ]
     
@@ -147,7 +151,7 @@ teardown() {
     delete_app "$TEST_DOMAIN"
     
     # Test main function create with MantraChain policies
-    run main --action create --name "$TEST_APP_NAME" --domain "$TEST_DOMAIN" --policies "$MANTRACHAIN_POLICIES"
+    run main --action create --name "$TEST_APP_NAME" --domain "$TEST_DOMAIN" --policies "$MANTRACHAIN_POLICIES" --allowed-idp "$DEFAULT_ALLOWED_IDP"
     [ "$status" -eq 0 ]
     [[ "$output" == *"App ID:"* ]]
     
@@ -158,7 +162,7 @@ teardown() {
 
 @test "integration: main function delete action" {
     # First create an app
-    output=$(create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" 2>&1)
+    output=$(create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" "$DEFAULT_ALLOWED_IDP" 2>&1)
     app_id=$(echo "$output" | tail -n1)
     [ -n "$app_id" ]
     
@@ -176,7 +180,7 @@ teardown() {
     delete_app "$TEST_DOMAIN"
     
     # Test with custom policies (using defined MantraChain policy IDs)
-    run main --action create --name "$TEST_APP_NAME" --domain "$TEST_DOMAIN" --policies "$MANTRACHAIN_POLICIES"
+    run main --action create --name "$TEST_APP_NAME" --domain "$TEST_DOMAIN" --policies "$MANTRACHAIN_POLICIES" --allowed-idp "$DEFAULT_ALLOWED_IDP"
     [ "$status" -eq 0 ]
     [[ "$output" == *"App ID:"* ]]
     
@@ -191,7 +195,7 @@ teardown() {
     [ -z "$result" ]
     
     # Create an app and test existence
-    output=$(create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" 2>&1)
+    output=$(create_app "$TEST_APP_NAME" "$TEST_DOMAIN" "$MANTRACHAIN_POLICIES" "$DEFAULT_ALLOWED_IDP" 2>&1)
     app_id=$(echo "$output" | tail -n1)
     [ -n "$app_id" ]
     

@@ -90,6 +90,9 @@ create_app() {
     local name="$1"
     local domain="$2"
     local policies_str="$3"
+    local allowed_idp="$4"
+
+    echo "LETS GO CREATE"
     
     # If policies string is empty, use default
     if [ -z "$policies_str" ]; then
@@ -122,8 +125,10 @@ create_app() {
     "domain": "$domain",
     "type": "self_hosted",
     "policies": $policies_json,
-    "allowed_idps": [],
-    "auto_redirect_to_identity": false,
+    "allowed_idps": [
+        "$allowed_idp"
+    ],
+    "auto_redirect_to_identity": true,
     "session_duration": "24h",
     "http_only_cookie_attribute": true,
     "enable_binding_cookie": false,
@@ -210,6 +215,7 @@ main() {
     local name=""
     local domain=""
     local policies="$DEFAULT_POLICIES"
+    local allowed_idp=""
     
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -230,6 +236,10 @@ main() {
                 policies="$2"
                 shift 2
                 ;;
+            --allowed-idp)
+                allowed_idp="$2"
+                shift 2
+                ;;
             *)
                 echo "Unknown option $1"
                 exit 1
@@ -239,8 +249,14 @@ main() {
     
     # Validate required parameters
     if [ -z "$action" ] || [ -z "$name" ] || [ -z "$domain" ]; then
-        echo "Usage: $0 --action <create|delete> --name <app_name> --domain <domain> [--policies <policies>]"
+        echo "Usage: $0 --action <create|delete> --name <app_name> --domain <domain> --allowed-idp <idp_id> [--policies <policies>]"
         echo "Policies format: POLICY_ID1:PRECEDENCE1,POLICY_ID2:PRECEDENCE2"
+        exit 1
+    fi
+    
+    # Validate allowed_idp is provided for create action
+    if [ "$action" = "create" ] && [ -z "$allowed_idp" ]; then
+        echo "Error: --allowed-idp is required for create action"
         exit 1
     fi
     
@@ -255,7 +271,7 @@ main() {
             # Create app (with built-in idempotent behavior)
             echo "Creating application..."
             local app_id
-            app_id=$(create_app "$name" "$domain" "$policies")
+            app_id=$(create_app "$name" "$domain" "$policies" "$allowed_idp")
             echo "App ID: $app_id"
             echo "::set-output name=app_id::$app_id"
             ;;
