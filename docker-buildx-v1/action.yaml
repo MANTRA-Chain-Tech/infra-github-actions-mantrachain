@@ -27,6 +27,14 @@ inputs:
     description: Build platforms for Docker image build.
     default: linux/amd64,linux/arm64
     required: true
+  cache_type:
+    description: 'The type of cache backend to use (e.g., gha, registry).'
+    required: false
+    default: 'gha'
+  cache_ref:
+    description: 'The reference for the cache (e.g., for type=registry).'
+    required: false
+    default: ''
 
 outputs: { }
 
@@ -77,5 +85,9 @@ runs:
       tags: ${{ steps.meta.outputs.tags }}
       labels: ${{ steps.meta.outputs.labels }}
       build-args: ${{ inputs.build_args }}
-      cache-from: type=gha
-      cache-to: type=gha,mode=max
+      cache-from: |
+        ${{ inputs.cache_type == 'registry' && format('type=registry,ref={0}', inputs.cache_ref) || '' }}
+        ${{ inputs.cache_type == 'gha' && 'type=gha' || '' }}
+      cache-to: |
+        ${{ inputs.cache_type == 'registry' && format('type=registry,ref={0},mode=max', inputs.cache_ref) || '' }}
+        ${{ inputs.cache_type == 'gha' && 'type=gha,mode=max' || '' }}
